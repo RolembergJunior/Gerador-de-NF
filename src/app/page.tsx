@@ -1,113 +1,301 @@
-import Image from 'next/image'
+'use client'
+
+
+import pdfMaker from 'pdfmake/build/pdfmake'
+import pdfFonts from 'pdfmake/build/vfs_fonts'
+import { useEffect, useState } from 'react'
+
+interface ObjectProps{
+  name: string,
+  price: string,
+  description: string
+}
 
 export default function Home() {
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [description, setDescription] = useState('');
+  const [informations, setInformations] = useState<ObjectProps>({ name:'', price:'', description:''})
+
+  useEffect( () => {
+    concatStates()
+  }, [name,price,description])
+
+  function concatStates(){
+    setInformations({ name: name, price: price, description: description })
+  }
+
+  function configurePDF(){
+    pdfMaker.vfs = pdfFonts.pdfMake.vfs;
+
+    const reportTitle = [
+      {
+        alignment: 'center',
+        text: 'Nota Fiscal',
+        fontSize:20,
+        bold: true,
+        margin: [15, 20, 0, 45]
+      }
+    ];
+
+    function Rodape(currentPage: string, pageCount: string){
+      return [
+        {
+          text: currentPage + ' / ' + pageCount,
+          alignment: 'right',
+          fontSize: 9,
+          margin: [0, 10, 20, 0]
+        }
+      ]
+    };
+
+     var docDefinitions = {
+        pageSize: 'A4',
+        pageMargins: [15, 50, 15, 40],
+        header: [reportTitle],
+      //  content: [details],
+        footer: Rodape,
+        content: [
+          {
+            styles: 'tableExample',
+            margin: [15, 30, 0, 15],
+            table: {
+              // widths: ['*', 'auto'],
+              body: [
+                [
+                  { 
+                    colSpan: 3,
+                    border: [true, true, true, false],
+                    fillColor: '#eeeeee',
+                    text: 'Chave de Acesso da NFS-e:'
+                  },
+                  '',
+                  '',
+                ],
+                [
+                  {
+                    border: [true, false, false, false],
+                    fillColor: '#eeeeee',
+                    text: 'Número da NFS-e:'
+                  },
+                  {
+                    border: [false, false, false, false],
+                    fillColor: '#eeeeee',
+                    text: 'Competência da NFS-e:'
+                  },
+                  {
+                    border: [false, false, true, false],
+                    fillColor: '#eeeeee',
+                    text: 'Data e Hora da emissão da NFS-e:'
+                  }
+                ],
+                [
+                  {
+                    border: [true, false, false, true],
+                    fillColor: '#eeeeee',
+                    text: 'Número da DPS:'
+                  },
+                  {
+                    border: [false, false, false, true],
+                    fillColor: '#eeeeee',
+                    text: 'Série da DPS:'
+                  },
+                  {
+                    border: [false, false, true, true],
+                    fillColor: '#eeeeee',
+                    text: 'Data e Hora da emissão da DPS:'
+                  }
+             
+                ]   
+              ],
+            },    
+          },
+          {
+            text: `Eu, ${informations.name}, portador do CPF ${informations.price}, declaro que realizei uma prestação de serviço para a empresa Juninho ltda., portadora CNPJ 89.232.249/0001-36, onde o serviço realizado foi ${informations.description} no valor total de R$ ${informations.price},00`,
+            style: 'text'
+          },
+          {
+            styles: 'tableExample',
+            margin: [15, 30, 0, 15],
+            table: {
+              // widths: ['*', 'auto'],
+              body: [
+                [
+                  { 
+                    border: [true, true, true, false],
+                    fillColor: '#eeeeee',
+                    text: 'EMITENTE DA NFS-e:'
+                  },
+                  { 
+                    border: [false, true, false, false],
+                    fillColor: '#eeeeee',
+                    text: 'CNPJ / CPF / NIF:'
+                  },
+                  { 
+                    border: [false, true, false, false],
+                    fillColor: '#eeeeee',
+                    text: 'Inscrição Municipa:'
+                  },
+                  { 
+                    border: [false, true, true, false],
+                    fillColor: '#eeeeee',
+                    text: 'Telefone:'
+                  },
+                ],
+                [
+                  {
+                    colSpan: 2,
+                    border: [true, false, false, false],
+                    fillColor: '#eeeeee',
+                    text: 'Nome / Nome Empresarial:'
+                  },
+                  '',
+                  {
+                    colSpan: 2,
+                    border: [false, false, true, false],
+                    fillColor: '#eeeeee',
+                    text: 'E-mail:'
+                  },
+                  '',
+                ],
+                [
+                  {
+                    colSpan: 2,
+                    border: [true, false, false, false],
+                    fillColor: '#eeeeee',
+                    text: 'Endereço:           '
+                  },
+                  '',
+                  {
+                    border: [false, false, false, false],
+                    fillColor: '#eeeeee',
+                    text: 'Município:         '
+                  },
+                  {
+                    border: [false, false, true, false],
+                    fillColor: '#eeeeee',
+                    text: 'CEP:             '
+                  }
+             
+                ],
+                [
+                  {
+                    colSpan: 2,
+                    border: [true, false, false, true],
+                    fillColor: '#eeeeee',
+                    text: 'imples Nacional na Data de Competência:'
+                  },
+                  '',
+                  {
+                    colSpan: 2,
+                    border: [false, false, true, true],
+                    fillColor: '#eeeeee',
+                    text: 'Regime de Apuração Tributária pelo SN:'
+                  },
+                  '',
+                ],
+              ],
+            },    
+          },
+          {
+            margin: [15, 20, 0, 15],
+            text: 'SERVIÇO PRESTADO',
+            style: 'text'
+          },
+          {
+            margin: [15, 30, 0, 15],
+            table: {
+            // widths: ['*', 'auto'],
+            body: [
+              [
+                { 
+                  border: [true, true, false, false],
+                  fillColor: '#eeeeee',
+                  text: 'Código de Tributação Nacional:'
+                },
+                { 
+                  border: [false, true, false, false],
+                  fillColor: '#eeeeee',
+                  text: 'Local da Prestação:'
+                },
+                { 
+                  border: [false, true, true, false],
+                  fillColor: '#eeeeee',
+                  text: 'País da Prestação:'
+                },
+              ],
+              [
+                {
+                  colSpan: 2,
+                  border: [true, false, false, true],
+                  fillColor: '#eeeeee',
+                  text: `Descrição do Serviço: ${informations.description}` 
+                },
+                '',
+                {
+                  border: [false, false, true, true],
+                  fillColor: '#eeeeee',
+                  text: `Valor do serviço: ${informations.price}` 
+                }
+              ],
+            ],
+        styles: {
+          header: {
+            alignment: 'center',
+            fontSize: 18,
+            bold: true
+          },
+          subheader: {
+            alignment: 'center',
+            fontSize: 15,
+            bold: true
+          },
+          quote: {
+            italics: true
+          },
+          small: {
+            fontSize: 8
+          },
+          tableExample: {
+            margin: [0, 5, 0, 15],
+            alignment: 'center',
+          },
+        },
+      },
+    },
+  ]}
+
+    pdfMaker.createPdf(docDefinitions).download()
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main >
+        <div>
+          <img className="m-auto mt-3" src="./Gov.br_logo.svg.png" alt="Logo da empresa" width={300} height={500}/>
+          <div className="bg-slate-400 w-[80%] h-[780px] m-auto mt-20 mb-20 p-10">
+            <h1 className=" text-5xl text-center">Gere sua Nota!</h1>
+            <div className="bg-slate-300 p-10 mt-9">
+              <div className="flex">
+                <div className="flex flex-col w-[60%]">
+                  <label className="m-2"> NOME DO PAGADOR </label>
+                  <input onChange={(e) => setName(e.target.value)} className="m-2 h-10 p-2" value={name} type="text" placeholder="Rolemberg Junior"/>
+                </div>
+                <div className="flex flex-col w-[32%]">
+                  <label className="m-2"> VALOR DO SERVIÇO PRESTADO </label>
+                  <input onChange={(e) => setPrice(e.target.value)} className="m-2 h-10 p-2" value={price} type="number" placeholder="R$100,00"/>
+                </div>
+              </div>
+              <div className=" flex flex-col mt-8">
+                <label className="m-2"> DESCRIÇÃO DO SERVIÇO PRESTADO </label>
+                <input onChange={(e) => setDescription(e.target.value)} className="block m-2 w-[91%] h-[300px] p-2 top-1" type="text" value={description} placeholder="Prestei serviços de análise e desenvolvimento de sistemas"/>
+              </div>
+            </div>
+              <div className="flex gap-3 justify-end p-4">
+                <button className="bg-red-500 text-white w-[150px] h-[50px] rounded-lg">Limpar</button>
+                <button onClick={() => configurePDF()} className="bg-green-500 w-[150px] h-[50px] rounded-lg">Gerar - PDF</button>
+              </div>
+          </div>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
     </main>
   )
 }
